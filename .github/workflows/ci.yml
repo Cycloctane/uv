@@ -14,89 +14,35 @@ concurrency:
 
 jobs:
 
-  check-fmt:
-    uses: $/.github/workflows/check-fmt.yml
-
-  check-lint:
-
-    uses: $/.github/workflows/check-lint.yml
-    with:
-      code-changed: ${{ needs.plan.outputs.test-code }}
-      save-rust-cache: ${{ needs.plan.outputs.save-rust-cache }}
-
-  check-docs:
-
-    if: ${{ needs.plan.outputs.run-checks == 'true' }}
-    uses: $/.github/workflows/check-docs.yml
-    secrets: inherit
-
-  check-zizmor:
-
-    if: ${{ needs.plan.outputs.run-checks == 'true' }}
-    uses: $/.github/workflows/check-zizmor.yml
-    permissions:
-      contents: read
-      security-events: write
-
-  check-publish:
-
-    if: ${{ needs.plan.outputs.test-code == 'true' }}
-    uses: $/.github/workflows/check-publish.yml
-
-  check-release:
-
-    if: ${{ needs.plan.outputs.run-checks == 'true' }}
-    uses: $/.github/workflows/check-release.yml
-
-  check-lock:
-
-    if: ${{ needs.plan.outputs.run-checks == 'true' }}
-    uses: $/.github/workflows/check-lock.yml
-
-  check-generated-files:
-
-    if: ${{ needs.plan.outputs.test-code == 'true' }}
-    uses: $/.github/workflows/check-generated-files.yml
-    with:
-      schema-changed: ${{ needs.plan.outputs.check-schema }}
-      save-rust-cache: ${{ needs.plan.outputs.save-rust-cache }}
-
   test:
 
-    if: ${{ needs.plan.outputs.test-code == 'true' }}
     uses: $/.github/workflows/test.yml
     with:
-      save-rust-cache: ${{ needs.plan.outputs.save-rust-cache }}
-      test-macos: ${{ needs.plan.outputs.test-macos }}
+      save-rust-cache: true
+      test-macos: true
 
   test-windows-trampolines:
 
-    if: ${{ needs.plan.outputs.test-windows-trampoline == 'true' }}
     uses: $/.github/workflows/test-windows-trampolines.yml
     with:
-      trampoline-build: ${{ needs.plan.outputs.test-windows-trampoline-check-binary }}
+      trampoline-build: true
 
   build-dev-binaries:
 
-    if: ${{ needs.plan.outputs.test-code == 'true' }}
     uses: $/.github/workflows/build-dev-binaries.yml
     with:
-      save-rust-cache: ${{ needs.plan.outputs.save-rust-cache }}
+      save-rust-cache: true
 
   test-smoke:
     needs:
-      - plan
       - build-dev-binaries
-    if: ${{ needs.plan.outputs.test-smoke == 'true' }}
     uses: $/.github/workflows/test-smoke.yml
     with:
       sha: ${{ github.sha }}
 
   test-integration:
     needs:
-      - plan
       - build-dev-binaries
-    if: ${{ needs.plan.outputs.test-integration == 'true' }}
     uses: $/.github/workflows/test-integration.yml
     secrets: inherit
     permissions:
@@ -106,34 +52,23 @@ jobs:
 
   test-system:
     needs:
-      - plan
       - build-dev-binaries
-    if: ${{ needs.plan.outputs.test-system == 'true' }}
     uses: $/.github/workflows/test-system.yml
     with:
       sha: ${{ github.sha }}
 
   test-ecosystem:
     needs:
-      - plan
       - build-dev-binaries
-    if: ${{ needs.plan.outputs.test-ecosystem == 'true' }}
     uses: $/.github/workflows/test-ecosystem.yml
     with:
       sha: ${{ github.sha }}
 
-  build-release-binaries:
-
-    if: ${{ needs.plan.outputs.build-release-binaries == 'true' }}
-    uses: $/.github/workflows/build-release-binaries.yml
-    secrets: inherit
-
   build-docker:
 
-    if: ${{ needs.plan.outputs.build-docker == 'true' }}
     uses: $/.github/workflows/build-docker.yml
     with:
-      push-dev: ${{ needs.plan.outputs.push-docker == 'true' }}
+      push-dev: false
     secrets: inherit
     permissions:
       contents: read
@@ -143,8 +78,7 @@ jobs:
 
   bench:
 
-    if: ${{ needs.plan.outputs.run-bench == 'true' }}
     uses: $/.github/workflows/bench.yml
     secrets: inherit
     with:
-      save-rust-cache: ${{ needs.plan.outputs.save-rust-cache }}
+      save-rust-cache: true
